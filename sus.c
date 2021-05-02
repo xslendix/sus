@@ -19,7 +19,7 @@
 
 #define MAX_PASSWORD 3
 
-// TODO: Add group check
+// TODO: Add pipe support
 
 void get_password(char *password);
 
@@ -48,6 +48,9 @@ void intHandler(int dummy) {
 }
 
 int main(int argc, char** argv) {
+	struct rule *rule;
+	char **envp;
+
 	if (CheckIfInGroup("wheel") != 1) {
 		puts("ERROR: Not in the wheel group.");
 		return 0;
@@ -161,7 +164,7 @@ void PrintHelp() {
 int AskPassword() {
 	for (int i=0; i<MAX_PASSWORD; i++) {
 		printf("Password: ");
-		char password[256];
+		char password[BUFSIZ];
 		get_password(password);
 
 		int res = CheckPassword(password);

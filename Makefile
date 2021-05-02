@@ -1,5 +1,5 @@
 build:
-	cc -lcrypt sus.c -o sus
+	cc -lcrypt -I. sus.c -o sus
 
 all: build install
 
