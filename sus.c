@@ -1,5 +1,7 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <termios.h>
 
@@ -7,14 +9,11 @@
 
 #include <string.h>
 
-#define _XOPEN_SOURCE
-
 #include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
 #include <shadow.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 #include <errno.h>
 
@@ -98,13 +97,13 @@ int main(int argc, char** argv)
             memmove(username, username + 1, strlen(username));
     }
 
-    char* command = "";
-    for (int i = command_start; i < argc; i++) {
-        cats(&command, argv[i]);
-        cats(&command, " ");
-    }
+    // char* command = "";
+    // for (int i = command_start; i < argc; i++) {
+    //     cats(&command, argv[i]);
+    //     cats(&command, " ");
+    // }
 
-    command[strlen(command) - 1] = '\0';
+    // command[strlen(command) - 1] = '\0';
 
     if (username[0] == '\0')
         uid = 0;
@@ -113,10 +112,13 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    if (fork() == 0) {
-        setuid(uid);
-        system(command);
-    }
+    argv += command_start;
+    setuid(uid);
+    char* path = getenv("PATH");
+    char pathenv[strlen(path) + sizeof("PATH=")];
+    sprintf(pathenv, "PATH=%s", path);
+    char* envp[] = { pathenv, NULL };
+    execvpe(argv[0], argv, envp);
 
     return 0;
 }
