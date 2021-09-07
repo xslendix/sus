@@ -56,7 +56,23 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    signal(SIGINT, intHandler);
+    struct sigaction savealrm, saveint, savehup, savequit, saveterm;
+    struct sigaction savetstp, savettin, savettou, savepipe;
+
+    struct sigaction sa;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = intHandler;
+
+    sigaction(SIGALRM, &sa, &savealrm);
+    sigaction(SIGHUP,  &sa, &savehup);
+    sigaction(SIGINT,  &sa, &saveint);
+    sigaction(SIGPIPE, &sa, &savepipe);
+    sigaction(SIGQUIT, &sa, &savequit);
+    sigaction(SIGTERM, &sa, &saveterm);
+    sigaction(SIGTSTP, &sa, &savetstp);
+    sigaction(SIGTTIN, &sa, &savettin);
+    sigaction(SIGTTOU, &sa, &savettou);
 
     command_name = malloc((1 + strlen(argv[0])) * sizeof(char));
     strcpy(command_name, argv[0]);
@@ -111,6 +127,16 @@ int main(int argc, char** argv)
         printf("ERROR: Could not find username: %s", username);
         return 1;
     }
+
+    sigaction(SIGALRM, &sa, NULL);
+    sigaction(SIGHUP,  &sa, NULL);
+    sigaction(SIGINT,  &sa, NULL);
+    sigaction(SIGPIPE, &sa, NULL);
+    sigaction(SIGQUIT, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGTSTP, &sa, NULL);
+    sigaction(SIGTTIN, &sa, NULL);
+    sigaction(SIGTTOU, &sa, NULL);
 
     argv += command_start;
     setuid(uid);
