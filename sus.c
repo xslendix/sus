@@ -42,6 +42,8 @@ struct termios old_terminal;
 
 void getln(int, char*, size_t);
 
+struct passwd* pw;
+
 void intHandler(int dummy)
 {
     tcsetattr(STDIN_FILENO, TCSANOW, &old_terminal);
@@ -49,8 +51,11 @@ void intHandler(int dummy)
     exit(0);
 }
 
-int main(int argc, char** argv)
+int main(int argc, char** argv, char** envp)
 {
+    uid = getuid();
+    pw = getpwuid(uid);
+
     if (CheckIfInGroup("wheel") != 1) {
         puts("ERROR: Not in the wheel group.");
         return 0;
@@ -130,12 +135,9 @@ int main(int argc, char** argv)
     sigaction(SIGTTIN, &sa, NULL);
     sigaction(SIGTTOU, &sa, NULL);
 
+
     argv += command_start;
     setuid(uid);
-    char* path = getenv("PATH");
-    char pathenv[strlen(path) + sizeof("PATH=")];
-    sprintf(pathenv, "PATH=%s", path);
-    char* envp[] = { pathenv, NULL };
     execvpe(argv[0], argv, envp);
 
     return 0;
@@ -143,7 +145,6 @@ int main(int argc, char** argv)
 
 int GetUID(const char* username, uid_t* uid)
 {
-    struct passwd* pw;
     pw = getpwnam(username);
     if (pw != NULL) {
         *uid = pw->pw_uid;
