@@ -113,14 +113,6 @@ int main(int argc, char** argv)
             memmove(username, username + 1, strlen(username));
     }
 
-    // char* command = "";
-    // for (int i = command_start; i < argc; i++) {
-    //     cats(&command, argv[i]);
-    //     cats(&command, " ");
-    // }
-
-    // command[strlen(command) - 1] = '\0';
-
     if (username[0] == '\0')
         uid = 0;
     else if (GetUID(username, &uid) == -1) {
